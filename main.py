@@ -13,7 +13,7 @@ api = Api(app)
 
 @app.route('/')
 def index():
-    return 'test'
+    return 'ssdfsdsdf'
 
 
 
@@ -25,7 +25,9 @@ def api():
 
 @app.route('/predict', methods =['POST'])
 def predict():
+
     value = request.json
+    # return str(value)
     df = pd.read_csv('exercise_26_test.csv')
 
     # df = pd.DataFrame(value)
@@ -86,4 +88,4 @@ def predict():
 
 
 if __name__ == '__main__':
-    app.run(debug=True)
+    app.run(debug=True, host ='0.0.0.0')

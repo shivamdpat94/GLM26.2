@@ -1,8 +1,12 @@
 #Dockerfile, Image, Container
 
 FROM python:3.8
+WORKDIR /app
+COPY . .
 
-ADD main.py .3
-RUN pip install requests flask flask_restful pickle pandas flask_cors
 
-CMD ["python", ".main.py"]
+RUN pip install requests flask flask_restful pandas flask_cors statsmodels
+ENTRYPOINT ["python"]
+CMD ["main.py"]
+
+
