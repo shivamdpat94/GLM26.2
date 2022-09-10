@@ -19,7 +19,9 @@ def index():
 
 
 
-
+@app.route('/api', methods =['GET'])
+def api():
+    return 'Hello World'
 
 @app.route('/predict', methods =['POST'])
 def predict():
@@ -76,7 +78,7 @@ def predict():
 
     prediction = model.predict(train_imputed_std[variables])
     #
-    return prediction
+    return str(prediction)
 
 
 
