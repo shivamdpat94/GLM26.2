@@ -5,7 +5,7 @@ WORKDIR /app
 COPY . .
 
 
-RUN pip install requests flask flask_restful pandas flask_cors statsmodels
+RUN pip install requests flask flask_restful pandas flask_cors statsmodels sklearn
 ENTRYPOINT ["python"]
 CMD ["main.py"]
 

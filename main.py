@@ -28,11 +28,11 @@ def predict():
 
     value = request.json
     # return str(value)
-    df = pd.read_csv('exercise_26_test.csv')
+    # df = pd.read_csv('exercise_26_test.csv')
 
-    # df = pd.DataFrame(value)
+    df = pd.DataFrame.from_dict(value)
     if df.shape[1] != 100:
-        print("BAD INPUT")
+        return 'BAD INPUT'
 
 
 
