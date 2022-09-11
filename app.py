@@ -1,3 +1,5 @@
+
+
 from flask import Flask,request
 from flask_restful import Resource, Api
 import pickle
@@ -101,6 +103,5 @@ def predict():
 
 
 
-if __name__ == '__main__':
-    print('hi')
+if __name__ == "__main__":
     app.run(debug=True)
