@@ -16,7 +16,7 @@ api = Api(app)
 
 @app.route('/')
 def index():
-    return 'ssdfsdsdf'
+    return 'TESTING'
 
 
 
@@ -24,38 +24,44 @@ def index():
 
 @app.route('/api', methods =['GET'])
 def api():
-    return 'Hello World'
+    return 'ANOTHER TEST'
 
+
+
+
+#MODEL API
 @app.route('/predict', methods =['POST'])
 def predict():
 
-    #Loads pickle files for list of data types
-    objects = pickle.load(open('objects', 'rb'))
-    float64s = pickle.load(open('float64s','rb'))
+    #Loads pickle files for list of data types and model, scalar and imputer pickle files. Also list of variable names from feature selection
+    objects = pickle.load(open('objects', 'rb'))            #Fields that should be Object type
+    float64s = pickle.load(open('float64s','rb'))           #Fields that should be Float64
+    model = pickle.load(open('model', 'rb'))
+    scaler = pickle.load(open('scaler','rb'))
+    imputer = pickle.load(open('imputer','rb'))
+    variables = pickle.load(open('variables','rb'))         #Variables to be fed into the model (25)
 
     #Loads data into dataframe
     value = request.json
     # return str(value)
     # df = pd.read_csv('exercise_26_test.csv')
     df = pd.DataFrame.from_dict(value)
-    df = df.replace('',np.nan)          #replaces '' with NaN
+    df[float64s] = df[float64s].replace('',np.nan)                                          #replaces '' in fields that should be numeric with NaN
 
 
     #Checks to see if data size and type matches what is expected
     if df.shape[1] != 100:
         return 'Unexpected size of input'
-    if df.columns[df.dtypes == 'object'].tolist() != objects or df.columns[df.dtypes == 'float64'].tolist() != float64s:
-        return 'Mismatch variable types'
 
 
 
+    try:                                                                #Convert everything that should be a float to a float in case inputs are all strings. If not possible, type mismatch.
+        df[float64s] = df[float64s].astype(float)
+    except:
+        return 'Mismatch variable types_1'
+    if df.columns[df.dtypes == 'object'].tolist() != objects or df.columns[df.dtypes == 'float64'].tolist() != float64s:        #Another Type Mismatch check
+        return 'Mismatch variable types_2'
 
-
-    #Loads model, scalar and imputer pickle files. Also list of variable names from feature selection
-    model = pickle.load(open('model', 'rb'))
-    scaler = pickle.load(open('scaler','rb'))
-    imputer = pickle.load(open('imputer','rb'))
-    variables = pickle.load(open('variables','rb'))
 
 
 
@@ -70,10 +76,12 @@ def predict():
 
 
 
-    #Imputes and scales after dropping nonnumerical fields. One hot encodes those nonnumerical fields
-    test_imputed = pd.DataFrame(imputer.fit_transform(df.drop(columns=[ 'x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=[ 'x5', 'x31', 'x81', 'x82']).columns)
+    #Imputes and scales after dropping nonnumerical fields. Imputer removes
+    test_imputed = pd.DataFrame(imputer.fit_transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
     test_imputed_std = pd.DataFrame(scaler.fit_transform(test_imputed), columns=test_imputed.columns)
 
+
+    #One Hot Encodes dropped fields
     dumb5 = pd.get_dummies(df['x5'], drop_first=True, prefix='x5', prefix_sep='_', dummy_na=True)
     test_imputed_std = pd.concat([test_imputed_std, dumb5], axis=1, sort=False)
 
@@ -89,7 +97,7 @@ def predict():
 
     del dumb5, dumb31, dumb81, dumb82
 
-    #After one hot encoding, if desired fields for model not encoded, create them with 0 values
+    #After one hot encoding, if desired fields for model not encoded, create them with 0 values for all rows
     for var in variables:
         if var not in test_imputed_std:
             test_imputed_std[var] = 0
