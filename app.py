@@ -44,14 +44,14 @@ def predict():
     #Loads data into dataframe
     value = request.json
     # return str(value)
-    # df = pd.read_csv('exercise_26_train.csv').drop(columns =['y'])
-    try:
-        df = pd.DataFrame.from_dict(value)
-    except:
-        try:
-            df = pd.DataFrame.from_dict([value])
-        except:
-            return 'Improper Structure Format'
+    df = pd.read_csv('exercise_26_train.csv').drop(columns =['y'])
+    # try:
+    #     df = pd.DataFrame.from_dict(value)
+    # except:
+    #     try:
+    #         df = pd.DataFrame.from_dict([value])
+    #     except:
+    #         return 'Improper Structure Format'
 
     #Checks to see if data size and type matches what is expected
     if df.shape[1] != 100:
@@ -83,10 +83,10 @@ def predict():
 
 
     #If a field is entirely NAN, if it is not one of the selected fields, fill it with 0
-    allNAN = df.loc[:, df.isnull().all()].columns.tolist()
-    df[list(set(allNAN) - set(variables))] = 0
-    if bool(set(variables) & set(allNAN)):
-        return "Selected Feature is entirely NULL"
+    # allNAN = df.loc[:, df.isnull().all()].columns.tolist()
+    # df[list(set(allNAN) - set(variables))] = 0
+    # if bool(set(variables) & set(allNAN)):
+    #     return "Selected Feature is entirely NULL"
 
 
 
@@ -94,8 +94,8 @@ def predict():
 
 
     #Imputes and scales after dropping nonnumerical fields. Imputer removes
-    test_imputed = pd.DataFrame(imputer.fit_transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
-    test_imputed_std = pd.DataFrame(scaler.fit_transform(test_imputed), columns=test_imputed.columns)
+    test_imputed = pd.DataFrame(imputer.transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
+    test_imputed_std = pd.DataFrame(scaler.transform(test_imputed), columns=test_imputed.columns)
 
 
 
