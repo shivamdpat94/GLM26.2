@@ -44,17 +44,22 @@ def predict():
     #Loads data into dataframe
     value = request.json
     # return str(value)
-    # df = pd.read_csv('exercise_26_test.csv')
-    df = pd.DataFrame.from_dict(value)
-    df[float64s] = df[float64s].replace('',np.nan)                                          #replaces '' in fields that should be numeric with NaN
-
+    # df = pd.read_csv('exercise_26_train.csv').drop(columns =['y'])
+    try:
+        df = pd.DataFrame.from_dict(value)
+    except:
+        try:
+            df = pd.DataFrame.from_dict([value])
+        except:
+            return 'Improper Structure Format'
 
     #Checks to see if data size and type matches what is expected
     if df.shape[1] != 100:
         return 'Unexpected size of input'
 
 
-
+    #Checks and adjusts datatypes
+    df[float64s] = df[float64s].replace('',np.nan)                                          #replaces '' in fields that should be numeric with NaN
     try:                                                                #Convert everything that should be a float to a float in case inputs are all strings. If not possible, type mismatch.
         df[float64s] = df[float64s].astype(float)
     except:
@@ -76,12 +81,24 @@ def predict():
 
 
 
+
+    #If a field is entirely NAN, if it is not one of the selected fields, fill it with 0
+    allNAN = df.loc[:, df.isnull().all()].columns.tolist()
+    df[list(set(allNAN) - set(variables))] = 0
+    if bool(set(variables) & set(allNAN)):
+        return "Selected Feature is entirely NULL"
+
+
+
+
+
+
     #Imputes and scales after dropping nonnumerical fields. Imputer removes
     test_imputed = pd.DataFrame(imputer.fit_transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
     test_imputed_std = pd.DataFrame(scaler.fit_transform(test_imputed), columns=test_imputed.columns)
 
 
-    #One Hot Encodes dropped fields
+
     dumb5 = pd.get_dummies(df['x5'], drop_first=True, prefix='x5', prefix_sep='_', dummy_na=True)
     test_imputed_std = pd.concat([test_imputed_std, dumb5], axis=1, sort=False)
 
@@ -97,7 +114,7 @@ def predict():
 
     del dumb5, dumb31, dumb81, dumb82
 
-    #After one hot encoding, if desired fields for model not encoded, create them with 0 values for all rows
+    # After one hot encoding, if desired fields for model not encoded, create them with 0 values for all rows
     for var in variables:
         if var not in test_imputed_std:
             test_imputed_std[var] = 0
