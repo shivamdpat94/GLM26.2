@@ -42,16 +42,18 @@ def predict():
     variables = pickle.load(open('variables','rb'))         #Variables to be fed into the model (25)
 
     #Loads data into dataframe
+
+
+    # df = pd.read_csv('exercise_26_train.csv').drop(columns =['y'])
+
     value = request.json
-    # return str(value)
-    df = pd.read_csv('exercise_26_train.csv').drop(columns =['y'])
-    # try:
-    #     df = pd.DataFrame.from_dict(value)
-    # except:
-    #     try:
-    #         df = pd.DataFrame.from_dict([value])
-    #     except:
-    #         return 'Improper Structure Format'
+    try:
+        df = pd.DataFrame.from_dict(value)
+    except:
+        try:
+            df = pd.DataFrame.from_dict([value])
+        except:
+            return 'Improper Structure Format'
 
     #Checks to see if data size and type matches what is expected
     if df.shape[1] != 100:
@@ -82,23 +84,20 @@ def predict():
 
 
 
-    #If a field is entirely NAN, if it is not one of the selected fields, fill it with 0
-    # allNAN = df.loc[:, df.isnull().all()].columns.tolist()
-    # df[list(set(allNAN) - set(variables))] = 0
-    # if bool(set(variables) & set(allNAN)):
-    #     return "Selected Feature is entirely NULL"
 
 
 
 
 
-
-    #Imputes and scales after dropping nonnumerical fields. Imputer removes
+    #Imputes and scales after dropping nonnumerical fields.
     test_imputed = pd.DataFrame(imputer.transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
     test_imputed_std = pd.DataFrame(scaler.transform(test_imputed), columns=test_imputed.columns)
 
 
 
+
+
+    #One Hot Encodes the dropped numeric fields and appends them back
     dumb5 = pd.get_dummies(df['x5'], drop_first=True, prefix='x5', prefix_sep='_', dummy_na=True)
     test_imputed_std = pd.concat([test_imputed_std, dumb5], axis=1, sort=False)
 
@@ -119,10 +118,15 @@ def predict():
         if var not in test_imputed_std:
             test_imputed_std[var] = 0
 
-    prediction = model.predict(test_imputed_std[variables])
-    #
-    return str(prediction)
 
+
+
+    result = pd.DataFrame(test_imputed_std[variables])
+    result['phat'] = model.predict(test_imputed_std[variables])
+    result['business_outcome'] = np.where(result['phat'].lt(0.712), 0, 1)
+    result = result.reindex(sorted(result.columns), axis=1)
+    result = result.to_json(orient="records")
+    return result
 
 
 
