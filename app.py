@@ -56,7 +56,7 @@ def predict():
  'x62',
  'x31_germany',
  'x58',
- 'x56']
+ 'x56']                                         #Variables to be fed into the model (25)
     float64s = ['x0',
  'x1',
  'x2',
@@ -150,20 +150,24 @@ def predict():
  'x96',
  'x97',
  'x98',
- 'x99']
-    objects = ['x5', 'x12', 'x31', 'x63', 'x81', 'x82']
-    #Loads pickle files for list of data types and model, scalar and imputer pickle files. Also list of variable names from feature selection
-    # objects = pickle.load(open('objects', 'rb'))            #Fields that should be Object type
-    # float64s = pickle.load(open('float64s','rb'))           #Fields that should be Float64
+ 'x99']                                             #Fields that should be Float64
+    objects = ['x5', 'x12', 'x31', 'x63', 'x81', 'x82']         #Fields that should be Object type
+
+
+
+
+    #Loads pickle files for  model, scalar and imputer.
+    # objects = pickle.load(open('objects', 'rb'))
+    # float64s = pickle.load(open('float64s','rb'))
     model = pickle.load(open('model', 'rb'))
     scaler = pickle.load(open('scaler','rb'))
     imputer = pickle.load(open('imputer','rb'))
-    # variables = pickle.load(open('variables','rb'))         #Variables to be fed into the model (25)
+    # variables = pickle.load(open('variables','rb'))
 
     #Loads data into dataframe
 
 
-    # df = pd.read_csv('exercise_26_train.csv').drop(columns =['y'])
+
 
     value = request.json
     try:
