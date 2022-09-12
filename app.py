@@ -185,12 +185,9 @@ def predict():
 
     #Checks and adjusts datatypes
     df[float64s] = df[float64s].replace('',np.nan)                                          #replaces '' in fields that should be numeric with NaN
-    try:                                                                #Convert everything that should be a float to a float in case inputs are all strings. If not possible, type mismatch.
-        df[float64s] = df[float64s].astype(float)
-    except:
-        return 'Mismatch variable types_1'
-    if df.columns[df.dtypes == 'object'].tolist() != objects or df.columns[df.dtypes == 'float64'].tolist() != float64s:        #Another Type Mismatch check
-        return 'Mismatch variable types_2'
+
+    if df.columns[df.dtypes == 'object'].tolist() != objects or df.columns[df.dtypes == 'float64'].tolist() != float64s:        #Type Mismatch check
+        return 'Mismatch variable types'
 
 
 
