@@ -8,7 +8,7 @@ then
 ################  ONLY NEEDED TO RUN ONCE. CAN BE REMOVED ONCE IMAGE IS ON DEVICE ##############
         docker build --tag python-docker .
 ################################################################################################
-        docker run -d -p 1313:5000 python-docker
+        docker run -d -p 5000:5000 python-docker
 fi
 
 
