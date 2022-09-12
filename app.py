@@ -71,7 +71,6 @@ def predict():
 
 
 
-
     #From notebook. Formats dollar and percent.
     df['x12'] = df['x12'].str.replace('$', '')
     df['x12'] = df['x12'].str.replace(',', '')
@@ -88,14 +87,12 @@ def predict():
 
 
 
-
     #Imputes and scales after dropping nonnumerical fields.
     test_imputed = pd.DataFrame(imputer.transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
+
+
+    # test_imputed = pd.DataFrame(df.drop(columns=['x5', 'x31', 'x81', 'x82']))
     test_imputed_std = pd.DataFrame(scaler.transform(test_imputed), columns=test_imputed.columns)
-
-
-
-
 
     #One Hot Encodes the dropped numeric fields and appends them back
     dumb5 = pd.get_dummies(df['x5'], drop_first=True, prefix='x5', prefix_sep='_', dummy_na=True)
@@ -119,13 +116,12 @@ def predict():
             test_imputed_std[var] = 0
 
 
-
-
     result = pd.DataFrame(test_imputed_std[variables])
     result['phat'] = model.predict(test_imputed_std[variables])
     result['business_outcome'] = np.where(result['phat'].lt(0.712), 0, 1)
     result = result.reindex(sorted(result.columns), axis=1)
     result = result.to_json(orient="records")
+
     return result
 
 
@@ -133,4 +129,4 @@ def predict():
 
 
 if __name__ == "__main__":
-    app.run(debug=True)
+    app.run(host='0.0.0.0',debug=True,)
