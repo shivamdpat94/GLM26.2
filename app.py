@@ -9,22 +9,20 @@ import numpy as np
 
 
 app = Flask(__name__)
-#
 CORS(app)
-# creating an API object
 api = Api(app)
 
+
+
+
+#GET
 @app.route('/')
 def index():
-    return 'TESTING'
+    return 'Vist /predict Endpoint'
 
 
 
 
-
-@app.route('/api', methods =['GET'])
-def api():
-    return 'ANOTHER TEST'
 
 
 
@@ -56,7 +54,7 @@ def predict():
  'x62',
  'x31_germany',
  'x58',
- 'x56']                                         #Variables to be fed into the model (25)
+ 'x56']                                         #Variables to be fed into the model (x25)
     float64s = ['x0',
  'x1',
  'x2',
@@ -157,18 +155,15 @@ def predict():
 
 
     #Loads pickle files for  model, scalar and imputer.
-    # objects = pickle.load(open('objects', 'rb'))
-    # float64s = pickle.load(open('float64s','rb'))
     model = pickle.load(open('model', 'rb'))
     scaler = pickle.load(open('scaler','rb'))
     imputer = pickle.load(open('imputer','rb'))
-    # variables = pickle.load(open('variables','rb'))
-
-    #Loads data into dataframe
 
 
 
 
+
+    #Loads data into dataframe.
     value = request.json
     try:
         df = pd.DataFrame.from_dict(value)
@@ -176,17 +171,24 @@ def predict():
         try:
             df = pd.DataFrame.from_dict([value])
         except:
-            return 'Improper Structure Format'
+            return 'Structure of input appears to be incorrect'
 
-    #Checks to see if data size and type matches what is expected
+
+
+
+
+
+
+    #Checks to see if data size matches what it should be
     if df.shape[1] != 100:
         return 'Unexpected size of input'
 
+    #Converts empty values in Float64 fields from object to NAN in cases where all values of numeric column is empty for all rows.
+    df[float64s] = df[float64s].replace('',np.nan)
 
-    #Checks and adjusts datatypes
-    df[float64s] = df[float64s].replace('',np.nan)                                          #replaces '' in fields that should be numeric with NaN
 
-    if df.columns[df.dtypes == 'object'].tolist() != objects or df.columns[df.dtypes == 'float64'].tolist() != float64s:        #Type Mismatch check
+    #Check to see if data types are correct by comparing to lists from python notebook
+    if df.columns[df.dtypes == 'object'].tolist() != objects or df.columns[df.dtypes == 'float64'].tolist() != float64s:
         return 'Mismatch variable types'
 
 
@@ -207,14 +209,11 @@ def predict():
 
 
 
-    #Imputes and scales after dropping nonnumerical fields.
+    #Imputes and scales numerical fields.
     test_imputed = pd.DataFrame(imputer.transform(df.drop(columns=['x5', 'x31', 'x81', 'x82'])), columns=df.drop(columns=['x5', 'x31', 'x81', 'x82']).columns)
-
-
-    # test_imputed = pd.DataFrame(df.drop(columns=['x5', 'x31', 'x81', 'x82']))
     test_imputed_std = pd.DataFrame(scaler.transform(test_imputed), columns=test_imputed.columns)
 
-    #One Hot Encodes the dropped numeric fields and appends them back
+    #One Hot Encodes the dropped fields and appends them back
     dumb5 = pd.get_dummies(df['x5'], drop_first=True, prefix='x5', prefix_sep='_', dummy_na=True)
     test_imputed_std = pd.concat([test_imputed_std, dumb5], axis=1, sort=False)
 
@@ -227,15 +226,21 @@ def predict():
     dumb82 = pd.get_dummies(df['x82'], drop_first=True, prefix='x82', prefix_sep='_', dummy_na=True)
     test_imputed_std = pd.concat([test_imputed_std, dumb82], axis=1, sort=False)
 
-
     del dumb5, dumb31, dumb81, dumb82
 
-    # After one hot encoding, if desired fields for model not encoded, create them with 0 values for all rows
+
+
+
+
+    # After one hot encoding, if desired fields for model not created/encoded, create them with 0 values for all rows
     for var in variables:
         if var not in test_imputed_std:
             test_imputed_std[var] = 0
 
 
+
+
+    #Retrieve probability by running inputs into model. Classify 0 if less than .712, else 1, Concatenate both values with inputs and sort alphabetically. Convert to JSON
     result = pd.DataFrame(test_imputed_std[variables])
     result['phat'] = model.predict(test_imputed_std[variables])
     result['business_outcome'] = np.where(result['phat'].lt(0.712), 0, 1)
@@ -247,6 +252,6 @@ def predict():
 
 
 
-
+#port was set to 1313 but there were on and off periods where host could not connect to containerized API. 5000 seems more consistent
 if __name__ == "__main__":
     app.run(host='0.0.0.0',port='5000',debug=True,)
