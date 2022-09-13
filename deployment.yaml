@@ -28,7 +28,7 @@ spec:
     spec:
       containers:
       - name: flask-test-app
-        image: python-docker
+        image: shivamdpat94/dockerhub:myfirstimagepush
         imagePullPolicy: IfNotPresent
         ports:
         - containerPort: 5000

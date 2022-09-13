@@ -6,9 +6,9 @@ read option
 if [ $option -eq 1 ]
 then
 ################  ONLY NEEDED TO RUN ONCE. CAN BE REMOVED ONCE IMAGE IS ON DEVICE ##############
-        docker build --tag python-docker .
+        docker pull shivamdpat94/dockerhub:myfirstimagepush
 ################################################################################################
-        docker run -d -p 5000:5000 python-docker
+        docker run -d -p 5000:5000 shivamdpat94/dockerhub:myfirstimagepush
 fi
 
 
@@ -20,12 +20,12 @@ fi
 if [ $option -eq 2 ]
 then
 ################  ONLY NEEDED TO RUN ONCE. CAN BE REMOVED ONCE IMAGE IS ON DEVICE ##############
-        docker build --tag python-docker .
+        docker pull shivamdpat94/dockerhub:myfirstimagepush
 ################################################################################################
         minikube start
 
-################  ONLY NEEDED TO RUN ONCE. CAN BE REMOVED ONCE IMAGE IS ON DEVICE ....Look into "minikube image load python-docker ."##############
-        minikube image load python-docker
+################  ONLY NEEDED TO RUN ONCE. CAN BE REMOVED ONCE IMAGE IS ON DEVICE
+        minikube image load shivamdpat94/dockerhub:myfirstimagepush
 ################################################################################################
 	      kubectl apply -f deployment.yaml
 	      minikube service flask-test-service
