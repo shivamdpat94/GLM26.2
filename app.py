@@ -254,4 +254,4 @@ def predict():
 
 #port was set to 1313 but there were on and off periods where host could not connect to containerized API. Assuming local machine was utilizing that port creating confilct. 5000 seems more consistent
 if __name__ == "__main__":
-    app.run(port='5000',debug=True,)
+    app.run(host='0.0.0.0',port='5000',debug=True,)
